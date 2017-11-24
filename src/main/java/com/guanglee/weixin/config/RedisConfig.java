@@ -1,20 +1,24 @@
 package com.guanglee.weixin.config;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Configuration
 public class RedisConfig {
+
+	@Value("${spring.redis.maxexpire}")
+	private int maxexpire;
 
 	/**
 	 * 重写Redis序列化方式，使用Json方式:
@@ -42,8 +46,9 @@ public class RedisConfig {
 		redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
 		// 设置键（key）的序列化采用StringRedisSerializer。
 		redisTemplate.setKeySerializer(new StringRedisSerializer());
-
 		redisTemplate.afterPropertiesSet();
+		// 设置redis 超时时间
+		redisTemplate.expire("max", maxexpire, TimeUnit.SECONDS);
 		return redisTemplate;
 	}
 }
